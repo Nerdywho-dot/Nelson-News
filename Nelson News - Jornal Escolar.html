@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nelson News - O Portal de Notícias da Nossa Escola</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    },
+                    colors: {
+                        nelson: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen flex flex-col antialiased selection:bg-nelson-600 selection:text-white">
+
+    <!-- Top Bar -->
+    <div class="bg-nelson-950 text-slate-200 text-xs py-2 px-4 border-b border-nelson-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-4">
+                <span class="font-medium flex items-center gap-1.5"><i class="fa-regular fa-calendar text-nelson-400"></i> <span id="current-date">Carregando data...</span></span>
+                <span class="hidden md:inline text-nelson-700">|</span>
+                <span class="hidden md:inline text-nelson-300 font-semibold"><i class="fa-solid fa-graduation-cap text-amber-400 mr-1"></i> Edição Escolar Diária</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="bg-nelson-800 text-nelson-100 text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">Eletiva Nosso Jornal</span>
+                <button onclick="openPublishModal()" class="text-white hover:text-nelson-200 font-bold flex items-center gap-1.5 transition-colors">
+                    <i class="fa-solid fa-pen-to-square text-amber-400"></i> Publicar Matéria / Anúncio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between gap-4">
+                
+                <!-- Logo with Blue Globe -->
+                <a href="#" onclick="filterCategory('todos')" class="flex items-center gap-3.5 group">
+                    <div class="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center bg-gradient-to-tr from-nelson-900 via-nelson-700 to-nelson-500 rounded-full shadow-md group-hover:scale-105 transition-transform duration-300 p-1">
+                        <!-- Custom Blue Globe SVG -->
+                        <svg class="w-full h-full text-white drop-shadow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" class="stroke-blue-200" fill="rgba(37, 99, 235, 0.2)"/>
+                            <path d="M2 12h20" class="stroke-white"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" class="stroke-white"/>
+                            <path d="M4.5 7h15" class="stroke-blue-200"/>
+                            <path d="M4.5 17h15" class="stroke-blue-200"/>
+                        </svg>
+                        <!-- Sparkle overlay effect -->
+                        <div class="absolute inset-0 rounded-full bg-blue-400/10 mix-blend-overlay"></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-nelson-900 font-serif leading-none">
+                                NELSON <span class="text-nelson-600">NEWS</span>
+                            </h1>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-500 tracking-wider uppercase mt-1">A voz dos alunos da Escola Estadual Nelson Antonio</p>
+                    </div>
+                </a>
+
+                <!-- Search Bar & Actions -->
+                <div class="flex items-center gap-3">
+                    <div class="relative hidden sm:block w-48 md:w-64">
+                        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Buscar notícias..." class="w-full bg-slate-100 text-xs py-2 pl-9 pr-3 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600 focus:bg-white transition-all">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    </div>
+
+                    <button onclick="openPublishModal()" class="bg-nelson-600 hover:bg-nelson-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Nova Publicação</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar -->
+            <div class="mt-3 sm:hidden">
+                <div class="relative">
+                    <input type="text" id="search-input-mobile" onkeyup="handleSearchMobile()" placeholder="Buscar matérias ou anúncios..." class="w-full bg-slate-100 text-xs py-2 pl-9 pr-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav class="bg-nelson-900 text-white shadow-inner overflow-x-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto px-4 flex items-center whitespace-nowrap text-xs font-semibold">
+                <button onclick="filterCategory('todos')" class="nav-btn active border-b-2 border-white py-3 px-4 hover:bg-nelson-800 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-house text-nelson-200"></i> Início
+                </button>
+                <button onclick="filterCategory('Matérias')" class="nav-btn border-b-2 border-transparent py-3 px-4 hover:bg-nelson-800 transition-colors text-nelson-100 hover:text-white">
+                    Matérias & Reportagens
+                </button>
+                <button onclick="filterCategory('Artigos de Opinião')" class="nav-btn border-b-2 border-transparent py-3 px-4 hover:bg-nelson-800 transition-colors text-nelson-100 hover:text-white">
+                    Artigos de Opinião
+                </button>
+                <button onclick="filterCategory('Anúncios da Escola')" class="nav-btn border-b-2 border-transparent py-3 px-4 hover:bg-nelson-800 transition-colors text-amber-300 font-bold hover:text-amber-200 flex items-center gap-1">
+                    <i class="fa-solid fa-bullhorn text-xs"></i> Avisos & Anúncios
+                </button>
+                <button onclick="filterCategory('Esportes')" class="nav-btn border-b-2 border-transparent py-3 px-4 hover:bg-nelson-800 transition-colors text-nelson-100 hover:text-white">
+                    Esportes
+                </button>
+                <button onclick="filterCategory('Cultura & Eventos')" class="nav-btn border-b-2 border-transparent py-3 px-4 hover:bg-nelson-800 transition-colors text-nelson-100 hover:text-white">
+                    Cultura & Eventos
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        
+        <!-- Category Filter Title Notice (Hidden by default) -->
+        <div id="filter-title-container" class="hidden mb-6 flex items-center justify-between bg-nelson-50 border-l-4 border-nelson-600 p-4 rounded-r-xl">
+            <h2 class="text-lg font-bold text-nelson-900" id="filter-title">Mostrando todas as notícias</h2>
+            <button onclick="filterCategory('todos')" class="text-xs font-semibold text-nelson-600 hover:text-nelson-800 underline">Limpar filtro</button>
+        </div>
+
+        <!-- HERO HIGHLIGHT (Main Feature Story) -->
+        <section id="hero-section" class="mb-10">
+            <div id="hero-card" class="bg-white rounded-2xl overflow-hidden shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 grid grid-cols-1 lg:grid-cols-12 cursor-pointer" onclick="openArticleModal(posts[0].id)">
+                <!-- Hero Image -->
+                <div class="lg:col-span-7 relative h-64 sm:h-80 lg:h-auto overflow-hidden bg-slate-900">
+                    <img id="hero-img" src="" alt="Hero News" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
+                    <div class="absolute top-4 left-4">
+                        <span id="hero-badge" class="bg-nelson-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider shadow"></span>
+                    </div>
+                </div>
+                <!-- Hero Content -->
+                <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-gradient-to-br from-white to-nelson-50/30">
+                    <div>
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-semibold mb-3">
+                            <span id="hero-author" class="text-nelson-800 font-bold"></span>
+                            <span>•</span>
+                            <span id="hero-date"></span>
+                        </div>
+                        <h2 id="hero-title" class="text-2xl sm:text-3xl font-extrabold font-serif text-slate-900 leading-tight hover:text-nelson-600 transition-colors mb-4"></h2>
+                        <p id="hero-summary" class="text-slate-600 text-sm leading-relaxed line-clamp-3 mb-6"></p>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-slate-200 pt-4 text-xs font-semibold text-slate-500">
+                        <span class="text-nelson-600 font-bold hover:underline flex items-center gap-1">
+                            Ler matéria completa <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </span>
+                        <span id="hero-comments-count" class="flex items-center gap-1 bg-slate-100 px-2.5 py-1 rounded-full text-slate-600">
+                            <i class="fa-regular fa-comment text-nelson-600"></i> 0
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- School Official Announcements & News Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left 8 Columns: Main News Feed -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <div class="flex items-center justify-between border-b-2 border-nelson-900 pb-2">
+                    <h3 class="text-xl font-black text-nelson-900 font-serif flex items-center gap-2">
+                        <span class="w-3 h-3 bg-nelson-600 rounded-full inline-block"></span> Matérias Recentes
+                    </h3>
+                    <span class="text-xs text-slate-500 font-medium">Atualizado diariamente pelos alunos</span>
+                </div>
+
+                <!-- Feed Cards Grid -->
+                <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Dynamic Posts Rendered Here -->
+                </div>
+
+            </div>
+
+            <!-- Right 4 Columns: Sidebar with Announcements & Opinion Columns -->
+            <div class="lg:col-span-4 space-y-8">
+                
+                <!-- School Announcements Box (Avisos da Direção e Grêmio) -->
+                <div class="bg-gradient-to-b from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 text-amber-900 pointer-events-none">
+                        <i class="fa-solid fa-bullhorn text-9xl"></i>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-amber-900 font-bold border-b border-amber-200 pb-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center text-sm shadow">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-base leading-tight">Mural de Avisos Escolares</h4>
+                            <p class="text-[10px] font-normal text-amber-800">Comunicados Oficiais & Eventos</p>
+                        </div>
+                    </div>
+
+                    <div id="announcements-list" class="space-y-3.5 relative z-10">
+                        <!-- Dynamic Announcements Rendered Here -->
+                    </div>
+                </div>
+
+                <!-- Opinion Articles & Columnists -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+                        <h4 class="font-extrabold text-nelson-900 font-serif flex items-center gap-2 text-base">
+                            <i class="fa-solid fa-pen-nib text-nelson-600"></i> Colunas & Opinião
+                        </h4>
+                        <span class="text-[10px] bg-nelson-100 text-nelson-800 font-bold px-2 py-0.5 rounded">Voz do Aluno</span>
+                    </div>
+
+                    <div id="opinion-list" class="space-y-4">
+                        <!-- Dynamic Opinion Columns Rendered Here -->
+                    </div>
+                </div>
+
+                <!-- Quick Newsletter / Join Club Box -->
+                <div class="bg-nelson-900 text-white rounded-2xl p-6 text-center space-y-3 shadow-md">
+                    <div class="w-12 h-12 bg-nelson-800 rounded-full flex items-center justify-center mx-auto text-amber-400 text-xl border border-nelson-700">
+                        <i class="fa-solid fa-newspaper"></i>
+                    </div>
+                    <h4 class="font-bold text-base">Faça parte da equipe do Nelson News!</h4>
+                    <p class="text-xs text-nelson-200 leading-relaxed">Você gosta de escrever, fotografar ou desenhar? Venha ser um repórter do jornal da nossa escola.</p>
+                    <button onclick="alert('Procure a profª Maria de Português ou os membros do Grêmio na biblioteca nos intervalos!')" class="w-full bg-amber-400 hover:bg-amber-300 text-nelson-950 font-bold text-xs py-2.5 rounded-xl transition-all shadow">
+                        Como Participar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ARTICLE MODAL WITH COMMENTS -->
+    <div id="article-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border border-slate-200 relative my-auto">
+            
+            <!-- Modal Close Button -->
+            <button onclick="closeArticleModal()" class="sticky top-4 right-4 float-right z-20 w-9 h-9 bg-slate-900/70 hover:bg-slate-900 text-white rounded-full flex items-center justify-center transition-all shadow">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Article Cover -->
+            <div class="relative h-64 sm:h-80 w-full bg-slate-900">
+                <img id="modal-img" src="" alt="Article Cover" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                <div class="absolute bottom-4 left-6 right-6 text-white">
+                    <span id="modal-badge" class="bg-nelson-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow"></span>
+                    <h2 id="modal-title" class="text-2xl sm:text-3xl font-extrabold font-serif mt-2 leading-tight drop-shadow-md"></h2>
+                </div>
+            </div>
+
+            <!-- Article Body & Author Info -->
+            <div class="p-6 sm:p-8 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 text-xs text-slate-500 font-medium">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-nelson-100 text-nelson-700 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-user-pen"></i>
+                        </div>
+                        <div>
+                            <span id="modal-author" class="font-bold text-slate-800 block text-sm"></span>
+                            <span id="modal-date" class="text-[11px] text-slate-400"></span>
+                        </div>
+                    </div>
+                    <button onclick="shareArticle()" class="text-nelson-600 hover:text-nelson-800 font-semibold flex items-center gap-1.5 bg-nelson-50 px-3 py-1.5 rounded-lg transition-colors">
+                        <i class="fa-solid fa-share-nodes"></i> Compartilhar
+                    </button>
+                </div>
+
+                <!-- Text Content -->
+                <div id="modal-content" class="text-slate-700 font-serif leading-relaxed text-base space-y-4">
+                    <!-- Dynamic Article Text -->
+                </div>
+
+                <!-- COMMENTS SECTION -->
+                <div class="border-t-2 border-slate-200 pt-8 mt-8">
+                    <h3 class="text-xl font-bold font-serif text-nelson-900 mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-nelson-600"></i> Comentários (<span id="comments-count">0</span>)
+                    </h3>
+
+                    <!-- Add Comment Form -->
+                    <form onsubmit="handleAddComment(event)" class="bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200 mb-6 space-y-3">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Deixe seu comentário</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input type="text" id="comment-name" required placeholder="Seu Nome completo" class="w-full bg-white text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                            <input type="text" id="comment-class" required placeholder="Sua Turma/Série (ex: 2º B ou Profº)" class="w-full bg-white text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                        </div>
+                        <textarea id="comment-text" required rows="3" placeholder="Escreva o que achou desta publicação..." class="w-full bg-white text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600"></textarea>
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-nelson-600 hover:bg-nelson-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-paper-plane"></i> Publicar Comentário
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Comments List -->
+                    <div id="comments-list" class="space-y-4">
+                        <!-- Dynamic Comments Rendered Here -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- PUBLISH NEW POST MODAL -->
+    <div id="publish-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative my-auto">
+            
+            <button onclick="closePublishModal()" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                <div class="w-10 h-10 rounded-xl bg-nelson-600 text-white flex items-center justify-center text-lg shadow">
+                    <i class="fa-solid fa-newspaper"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold font-serif text-nelson-900">Nova Publicação no Nelson News</h3>
+                    <p class="text-xs text-slate-500">Envie sua matéria, artigo de opinião ou anúncio para o jornal</p>
+                </div>
+            </div>
+
+            <form onsubmit="handleCreatePost(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Título da Publicação *</label>
+                    <input type="text" id="post-title" required placeholder="Ex: Alunos ganham medalha na Olimpíada de Matemática" class="w-full bg-slate-50 text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Categoria *</label>
+                        <select id="post-category" required class="w-full bg-slate-50 text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                            <option value="Matérias">Matérias & Reportagens</option>
+                            <option value="Artigos de Opinião">Artigo de Opinião</option>
+                            <option value="Anúncios da Escola">Anúncio / Aviso da Escola</option>
+                            <option value="Esportes">Esportes</option>
+                            <option value="Cultura & Eventos">Cultura & Eventos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Autor / Turma *</label>
+                        <input type="text" id="post-author" required placeholder="Ex: Julia Santos (3º A)" class="w-full bg-slate-50 text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">URL da Imagem de Capa (Opcional)</label>
+                    <input type="url" id="post-image" placeholder="https://images.unsplash.com/... (Deixe em branco para imagem padrão)" class="w-full bg-slate-50 text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Conteúdo Completo *</label>
+                    <textarea id="post-content" required rows="5" placeholder="Escreva aqui o texto completo do seu artigo ou comunicação..." class="w-full bg-slate-50 text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-nelson-600"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
+                    <button type="button" onclick="closePublishModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-nelson-600 hover:bg-nelson-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Publicar Agora
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-nelson-950 text-slate-300 border-t-4 border-nelson-600 mt-16 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                
+                <!-- About Column -->
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 flex items-center justify-center bg-nelson-700 rounded-full">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="12" r="10" stroke="#bfdbfe" fill="rgba(37, 99, 235, 0.3)"/>
+                                <path d="M2 12h20" stroke="#fff"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="#fff"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-extrabold text-white font-serif tracking-tight">NELSON <span class="text-nelson-400">NEWS</span></span>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed pr-4">
+                        O Nelson News é o portal oficial de jornalismo estudantil da Escola Estadual Nelson. Criado e mantido por alunos com o intuito de informar, promover o pensamento crítico e integrar nossa comunidade escolar.
+                    </p>
+                </div>
+
+                <!-- Navigation Links -->
+                <div>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-3 border-b border-nelson-800 pb-1">Seções</h4>
+                    <ul class="space-y-2 text-slate-400">
+                        <li><a href="#" onclick="filterCategory('Matérias')" class="hover:text-white transition-colors">Matérias Principais</a></li>
+                        <li><a href="#" onclick="filterCategory('Anúncios da Escola')" class="hover:text-amber-300 transition-colors">Avisos da Direção</a></li>
+                        <li><a href="#" onclick="filterCategory('Artigos de Opinião')" class="hover:text-white transition-colors">Colunas de Alunos</a></li>
+                        <li><a href="#" onclick="filterCategory('Esportes')" class="hover:text-white transition-colors">Interclasses & Esportes</a></li>
+                        <li><a href="#" onclick="filterCategory('Cultura & Eventos')" class="hover:text-white transition-colors">Feiras & Eventos</a></li>
+                    </ul>
+                </div>
+
+                <!-- Editorial Team -->
+                <div>
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-3 border-b border-nelson-800 pb-1">Expediente</h4>
+                    <ul class="space-y-1.5 text-slate-400">
+                        <li><strong class="text-slate-200">Editora-Chefe:</strong> Profª Ingrid Mota</li>
+                        <li><strong class="text-slate-200">Revisão:</strong> Profº Mário Neres</li>
+                        <li><strong class="text-slate-200">Design & Web:</strong> Heitor de Souza (9º B)</li>
+                        <li><strong class="text-slate-200">Redator-Chefe:</strong> Heitor de Souza (9º B)</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="border-t border-nelson-800 pt-6 flex flex-col sm:flex-row items-center justify-between text-slate-500 gap-4">
+                <p>&copy; 2026 Nelson News — Projeto Jornalístico Escolar. Todos os direitos reservados.</p>
+                <div class="flex gap-4 text-base">
+                    <a href="#" class="text-slate-400 hover:text-white"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-white"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-white"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initial Dataset with Realistic School News Data
+        let posts = [
+            {
+                id: 2,
+                title: "COMUNICADO: Datas da Prova Paulista do 3º Bimestre divulgadas",
+                category: "Anúncios da Escola",
+                author: "Direção Escolar",
+                date: "19 de Setembro, 2026",
+                image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
+                summary: "Confira o calendário oficial da Prova Paulista que começam na próxima semana. Fiquem atentos aos horários de aula.",
+                content: `
+                    <p>A Direção Pedagógica comunica a todos os alunos e responsáveis que o calendário da Prova Paulita do 3º Bimestre já está disponível no grupo dos pais e na Sala Do Futuro.</p>
+                    <p>As avaliações ocorrerão entre os dias 22 e 23 de Setembro. Lembramos que durante a semana de provas os horários de entrada e saída permanecerão os mesmos.</p>
+                    <p>Recomendamos a utilização do espaço da biblioteca durante o horário de intervalo para grupos de estudos orientados pelos monitores.</p>
+                `,
+                comments: []
+            },
+        ];
+
+        let activePostId = null;
+        let currentFilter = 'todos';
+
+        // Set Current Date in Portuguese Format
+        function updateDate() {
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('pt-BR', dateOptions);
+            document.getElementById('current-date').innerText = today.charAt(0).toUpperCase() + today.slice(1);
+        }
+
+        // Render Posts on Page
+        function renderPosts(filteredPosts = posts) {
+            const grid = document.getElementById('news-grid');
+            const announcementsList = document.getElementById('announcements-list');
+            const opinionList = document.getElementById('opinion-list');
+
+            // Render Hero Post
+            if (filteredPosts.length > 0) {
+                const hero = filteredPosts[0];
+                document.getElementById('hero-img').src = hero.image;
+                document.getElementById('hero-badge').innerText = hero.category;
+                document.getElementById('hero-author').innerText = hero.author;
+                document.getElementById('hero-date').innerText = hero.date;
+                document.getElementById('hero-title').innerText = hero.title;
+                document.getElementById('hero-summary').innerText = hero.summary;
+                document.getElementById('hero-comments-count').innerHTML = `<i class="fa-regular fa-comment text-nelson-600"></i> ${hero.comments.length}`;
+                document.getElementById('hero-section').classList.remove('hidden');
+            } else {
+                document.getElementById('hero-section').classList.add('hidden');
+            }
+
+            // Render Main Feed (Excluding Hero if showing all)
+            const listToRender = currentFilter === 'todos' ? filteredPosts.slice(1) : filteredPosts;
+            
+            if (listToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
+                        <i class="fa-solid fa-newspaper text-4xl mb-3 text-slate-300"></i>
+                        <p class="font-bold text-slate-600">Nenhuma notícia encontrada nesta categoria.</p>
+                        <p class="text-xs">Tente buscar por outras palavras ou selecione 'Início'.</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = listToRender.map(post => `
+                    <article onclick="openArticleModal(${post.id})" class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="relative h-48 overflow-hidden bg-slate-800">
+                                <img src="${post.image}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <span class="absolute top-3 left-3 bg-nelson-900/90 backdrop-blur-sm text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                                    ${post.category}
+                                </span>
+                            </div>
+                            <div class="p-5">
+                                <div class="text-[11px] text-slate-400 font-semibold mb-2 flex items-center justify-between">
+                                    <span>${post.author}</span>
+                                    <span>${post.date}</span>
+                                </div>
+                                <h4 class="font-extrabold font-serif text-slate-900 text-base leading-snug group-hover:text-nelson-600 transition-colors line-clamp-2 mb-2">
+                                    ${post.title}
+                                </h4>
+                                <p class="text-slate-600 text-xs line-clamp-2 leading-relaxed">
+                                    ${post.summary}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500 bg-slate-50/50">
+                            <span class="text-nelson-600 group-hover:underline">Ler matéria</span>
+                            <span class="flex items-center gap-1 text-slate-400">
+                                <i class="fa-regular fa-comment text-nelson-600"></i> ${post.comments.length}
+                            </span>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            // Render School Announcements List
+            const announcements = posts.filter(p => p.category === 'Anúncios da Escola');
+            announcementsList.innerHTML = announcements.map(ann => `
+                <div onclick="openArticleModal(${ann.id})" class="p-3 bg-white/80 hover:bg-white rounded-xl border border-amber-200 shadow-sm cursor-pointer transition-all">
+                    <span class="text-[10px] font-extrabold text-amber-800 uppercase tracking-wide block mb-1">
+                        <i class="fa-regular fa-clock mr-1"></i> ${ann.date}
+                    </span>
+                    <h5 class="text-xs font-bold text-slate-900 hover:text-nelson-600 leading-snug line-clamp-2">
+                        ${ann.title}
+                    </h5>
+                </div>
+            `).join('');
+
+            // Render Opinion Articles
+            const opinions = posts.filter(p => p.category === 'Artigos de Opinião');
+            opinionList.innerHTML = opinions.map(op => `
+                <div onclick="openArticleModal(${op.id})" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-100 last:border-none">
+                    <div class="w-9 h-9 rounded-full bg-nelson-100 text-nelson-800 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        <i class="fa-solid fa-quote-left"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-xs font-bold text-slate-900 leading-snug line-clamp-2 hover:text-nelson-600">
+                            ${op.title}
+                        </h5>
+                        <span class="text-[10px] text-slate-400 font-medium block mt-1">Por ${op.author}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter Categories
+        function filterCategory(category) {
+            currentFilter = category;
+            
+            // Update Active Nav Buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.innerText.includes(category) || (category === 'todos' && btn.innerText.includes('Início'))) {
+                    btn.className = "nav-btn active border-b-2 border-white py-3 px-4 hover:bg-nelson-800 transition-colors flex items-center gap-1.5 text-white font-bold";
+                } else {
+                    btn.className = "nav-btn border-b-2 border-transparent py-3 px-4 hover:bg-nelson-800 transition-colors text-nelson-100 hover:text-white";
+                }
+            });
+
+            const filterNotice = document.getElementById('filter-title-container');
+            const filterTitle = document.getElementById('filter-title');
+
+            if (category === 'todos') {
+                filterNotice.classList.add('hidden');
+                renderPosts(posts);
+            } else {
+                filterNotice.classList.remove('hidden');
+                filterTitle.innerText = `Categoria: ${category}`;
+                const filtered = posts.filter(p => p.category === category);
+                renderPosts(filtered);
+            }
+        }
+
+        // Search Filter
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            filterPostsByQuery(query);
+        }
+
+        function handleSearchMobile() {
+            const query = document.getElementById('search-input-mobile').value.toLowerCase();
+            filterPostsByQuery(query);
+        }
+
+        function filterPostsByQuery(query) {
+            if (!query.trim()) {
+                renderPosts(posts);
+                return;
+            }
+            const results = posts.filter(p => 
+                p.title.toLowerCase().includes(query) || 
+                p.summary.toLowerCase().includes(query) || 
+                p.author.toLowerCase().includes(query) ||
+                p.category.toLowerCase().includes(query)
+            );
+            renderPosts(results);
+        }
+
+        // Article Modal Handlers
+        function openArticleModal(id) {
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+
+            activePostId = id;
+            document.getElementById('modal-img').src = post.image;
+            document.getElementById('modal-badge').innerText = post.category;
+            document.getElementById('modal-title').innerText = post.title;
+            document.getElementById('modal-author').innerText = post.author;
+            document.getElementById('modal-date').innerText = post.date;
+            document.getElementById('modal-content').innerHTML = post.content;
+
+            renderComments(post.comments);
+
+            document.getElementById('article-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeArticleModal() {
+            document.getElementById('article-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            activePostId = null;
+        }
+
+        // Comments System
+        function renderComments(comments) {
+            const commentsList = document.getElementById('comments-list');
+            document.getElementById('comments-count').innerText = comments.length;
+
+            if (comments.length === 0) {
+                commentsList.innerHTML = `
+                    <p class="text-xs text-slate-400 italic text-center py-4 bg-slate-50 rounded-xl">Seja o primeiro a comentar nesta matéria!</p>
+                `;
+                return;
+            }
+
+            commentsList.innerHTML = comments.map(c => `
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-1">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800">${c.name} <span class="font-normal text-slate-500">(${c.class})</span></span>
+                        <span class="text-[10px] text-slate-400">${c.date}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 leading-relaxed font-sans">${c.text}</p>
+                </div>
+            `).join('');
+        }
+
+        function handleAddComment(e) {
+            e.preventDefault();
+            if (!activePostId) return;
+
+            const name = document.getElementById('comment-name').value;
+            const userClass = document.getElementById('comment-class').value;
+            const text = document.getElementById('comment-text').value;
+
+            const post = posts.find(p => p.id === activePostId);
+            if (post) {
+                const newComment = {
+                    name: name,
+                    class: userClass,
+                    text: text,
+                    date: new Date().toLocaleDateString('pt-BR')
+                };
+                post.comments.unshift(newComment);
+                renderComments(post.comments);
+                renderPosts(posts); // Refresh counter in main feed
+
+                // Clear Form
+                document.getElementById('comment-name').value = '';
+                document.getElementById('comment-class').value = '';
+                document.getElementById('comment-text').value = '';
+            }
+        }
+
+        // Publish Modal Handlers
+        function openPublishModal() {
+            document.getElementById('publish-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePublishModal() {
+            document.getElementById('publish-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function handleCreatePost(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('post-title').value;
+            const category = document.getElementById('post-category').value;
+            const author = document.getElementById('post-author').value;
+            const imageInput = document.getElementById('post-image').value;
+            const contentText = document.getElementById('post-content').value;
+
+            const defaultImg = 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80';
+
+            const newPost = {
+                id: Date.now(),
+                title: title,
+                category: category,
+                author: author,
+                date: new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }),
+                image: imageInput.trim() !== '' ? imageInput : defaultImg,
+                summary: contentText.substring(0, 140) + '...',
+                content: contentText.split('\n').map(p => `<p>${p}</p>`).join(''),
+                comments: []
+            };
+
+            // Insert new post at top of list
+            posts.unshift(newPost);
+            renderPosts(posts);
+            closePublishModal();
+
+            // Clear inputs
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-author').value = '';
+            document.getElementById('post-image').value = '';
+            document.getElementById('post-content').value = '';
+
+            // Visual Notification
+            alert('🎉 Publicação enviada com sucesso! Ela já está disponível na página inicial.');
+        }
+
+        function shareArticle() {
+            alert('🔗 Link da matéria copiado! Compartilhe com seus colegas de sala.');
+        }
+
+        // On Load Initializations
+        window.onload = function() {
+            updateDate();
+            renderPosts(posts);
+        };
+    </script>
+</body>
+</html>
